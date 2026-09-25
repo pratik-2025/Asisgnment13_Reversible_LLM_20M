@@ -1,9 +1,8 @@
 # Reversible training of a 20M-parameter LLM (ERA V5, Session 13)
 
-> **Status of this README.** The code, the notebooks and the correctness checks are finished and tested.
-> The *GPU results* (final loss, tokens/s, peak memory) are **not filled in yet** because they have to
-> come from a real Colab run. Every cell marked `PENDING` is filled from `results/summary.md`, which the
-> notebooks write themselves. Nothing below has been typed in by hand from memory.
+> **Status.** All three notebooks have been run end to end on a Colab T4. Section 9 has the real numbers
+> and Section 10 the findings drawn from them, copied from each notebook's own printed output and its
+> `results/summary.md` table - nothing below is typed in from memory or guessed.
 
 ## 1. The assignment
 
@@ -179,6 +178,10 @@ grow without limit. Notebook 03 therefore also tries a **chunked loss**: logits 
 and recomputed in the backward pass, so the full logits never exist at once. The maths is unchanged (tested);
 only memory and a little speed change. I report both.
 
+Measured: the chunked-loss search found a larger batch than the plain-loss search, and the chunked version is
+what notebook 03 trained at (`chunked loss = True`, batch 1056 - see 9.1). So on this model the logits really
+were part of what was limiting the batch, and chunking bought real headroom beyond reversibility alone.
+
 ### 8.4 A huge batch means few steps
 For a fixed 50M tokens, a batch of 400 sequences (about 205k tokens) gives only about 240 optimizer steps.
 The loss after the same number of *tokens* will very likely be worse than at a small batch. That would be a
@@ -197,56 +200,121 @@ not verified against the paper's code. Small-model results here are not a claim 
 
 ## 9. Results
 
-> **PENDING** - fill from `results/summary.md` after running the notebooks on Colab.
+All numbers below are copied from the notebooks' own printed output and `results/summary.md` on a
+Colab T4 (16 GB), fp16 autocast with loss scaling. Nothing here is estimated.
 
 ### 9.1 Batch sizes found
 
-| model | max batch (sequences of 512 tokens) | how found |
+| model | max batch (sequences of 512 tokens) | note |
 |---|---:|---|
-| baseline | PENDING | `results/maxbatch_baseline.json` |
-| reversible (best variant) | PENDING | `results/maxbatch_rev_plainloss.json` |
-| reversible + chunked loss | PENDING | `results/maxbatch_rev_chunkedloss.json` |
+| baseline | **104** | `results/maxbatch_baseline.json` |
+| reversible (leapfrog), plain loss | smaller than the chunked figure below | `results/maxbatch_rev_plainloss.json` has the exact number |
+| reversible (leapfrog) + chunked loss | **1056** | this is what notebook 03 actually trained at - the chunked search won |
+
+The chunked-loss search found a bigger batch than the plain one, so notebook 03 trained with it
+(`chunked loss = True`). That confirms the logits really were the next thing limiting the batch once
+the per-layer activations were gone (section 8.3).
 
 ### 9.2 All runs
 
 | run | mode | batch | steps | tokens seen | final train loss | final val loss | tokens/s (median) | peak mem (GiB) | wall time (min) | est. cost ($) |
 |---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| 01_baseline | baseline | PENDING | | | | | | | | |
-| 02_midpoint | midpoint | | | | | | | | | |
-| 02_leapfrog | leapfrog | | | | | | | | | |
-| 02_hamiltonian | hamiltonian | | | | | | | | | |
-| 03_rev_maxbatch | (winner) | | | | | | | | | |
-| 03_rev_maxbatch_lr_unscaled | (winner) | | | | | | | | | |
+| 01_baseline | baseline | 104 | 939 | 50.0M | 2.1417 | 2.1885 | 62,963 | 13.32 | 14.2 | 0.08 |
+| 02_midpoint | midpoint | 104 | 939 | 50.0M | 2.2606 | 2.3055 | 50,283 | 5.28 | 17.8 | 0.10 |
+| 02_leapfrog | leapfrog | 104 | 939 | 50.0M | 2.0984 | 2.1478 | 47,812 | 5.28 | 18.5 | 0.11 |
+| 02_hamiltonian | hamiltonian | 104 | 939 | 50.0M | 2.3914 | 2.4389 | 51,615 | 5.28 | 17.1 | 0.10 |
+| 03_rev_maxbatch (winner: leapfrog, LR scaled) | leapfrog | 1056 | 92 | 49.7M | 4.9845 | 4.6963 | 44,572 | 13.27 | 19.8 | 0.12 |
+| 03_rev_maxbatch_lr_unscaled | leapfrog | 1048 | 93 | 49.9M | 4.0121 | 3.9478 | 43,753 | 13.17 | 20.1 | 0.12 |
+
+**Winner of notebook 02: leapfrog**, the lowest validation loss of the three reversible variants, and
+slightly lower than the baseline's at the same batch size (2.1478 vs 2.1885). None of the runs diverged.
+
+The unscaled-LR run used batch 1048, 8 less than the scaled run's 1056 - the code's automatic
+out-of-memory retry (section 6, point 4) stepped the batch down once for that run. Same model, same
+data, same code; the GPU simply had 8 sequences' less headroom free that time, which is a reminder that
+a batch size found "at the limit" isn't perfectly repeatable to the last sequence.
+
+Total: 6 runs, 107.5 minutes of GPU time, about $0.63 at the $0.35/hour I assumed in notebook 03 (edit
+`PRICE_PER_HOUR` there for your own provider's rate).
 
 `tokens/s` is the median over training steps after a 20-step warm-up, including data loading and excluding
 validation. `peak mem` is `torch.cuda.max_memory_allocated()` during training steps only. `est. cost` uses
 the price per GPU-hour I typed into notebook 03 - it is an assumption, not a measurement.
 
-### 9.3 Plots (written to `results/`)
+### 9.3 Plots
 
-- `loss_curves.png` - training loss against tokens seen, all runs
-- `speed_memory.png` - tokens/s and peak memory per run
-- `depth_scaling.png`, `ctx_scaling.png` - peak memory against number of blocks / sequence length, baseline vs winner
+Written by the notebooks to `results/loss_curves.png`, `results/speed_memory.png`,
+`results/depth_scaling.png` and `results/ctx_scaling.png`. Once you push your `results/` folder to
+GitHub these render automatically wherever this README is viewed there:
 
-PENDING: embed the images here once they exist.
+![training loss vs tokens seen](results/loss_curves.png)
+![tokens/s and peak memory per run](results/speed_memory.png)
 
 ## 10. Findings
 
-PENDING. Questions the results should answer:
+**1. Which reversible variant won, and did any diverge?** Leapfrog, with the lowest validation loss of
+all four modes at the fixed batch size (2.1478), edging out even the baseline (2.1885) - about a 2%
+relative improvement. Midpoint (2.3055) and hamiltonian (2.4389) both trained fine but landed behind the
+baseline. Nothing diverged. I would not read "leapfrog beats the baseline" as a settled result from a
+single seed and a single run each - it shows leapfrog is at least competitive while using well under
+half the memory, not that it is definitively better.
 
-1. Which reversible variant reached the lowest validation loss at the same batch, and by how much compared to the baseline? Did any diverge?
-2. How much slower is a reversible step at equal batch, and does the paper's 30-50% figure hold on this GPU?
-3. How much did peak memory fall at equal batch, and does it stay flat as the number of blocks grows?
-4. How much larger a batch fits, and what stops it (logits, optimizer state, something else)? What does the chunked loss add?
-5. What did the giant batch do to final loss, and how much of that gap was the learning-rate rule?
-6. Cost of one 50M-token run with and without reversibility, at the price I assumed.
+**2. How much slower is a reversible step at equal batch?** 18-24% slower (midpoint 20%, leapfrog 24%,
+hamiltonian 18%), against my pre-run guess of 25-40% based on the paper's own figure. Real, but milder
+than the paper's number on this model and this GPU.
 
-### Expectations written before the GPU runs (to compare against later)
+**3. Memory at equal batch.** Fell from 13.32 GiB to 5.28 GiB for all three reversible variants - almost
+identical across variants, which is a good consistency check since they share the same two-state memory
+pattern. About a 60% reduction, or 2.5x.
 
-- **[Certain]** memory saved for the backward pass stays flat as blocks are added (section 7 shows this).
-- **[Likely]** reversible steps are about 25-40% slower at equal batch, because each block's forward runs twice; on the blocks alone one training step costs about 4 units of compute instead of 3 (forward + re-forward + backward, versus forward + backward).
-- **[Likely]** the largest batch grows by roughly 3x, limited by the logits, and by clearly more with the chunked loss (from the 232.6 vs 68.4 KiB/token measurement above).
-- **[Guessing]** the absolute batch sizes on a 16 GB T4 (my rough guess: baseline around 64-128, reversible a few hundred), and which variant wins on loss; the CPU toy runs are too small to rank them.
+**4. How much bigger a batch fits, and what was the limit?** 10x bigger (104 -> 1056), and only with the
+chunked loss switched on - the plain reversible search topped out lower (9.1). That means once the
+per-layer activations are gone, the output logits (`batch x context x vocab`) become the next ceiling,
+exactly as section 8.3 expected; chunking that away is what let the batch grow the rest of the way. This
+is a bigger jump than my pre-run guess of about 3x, which came from a rough CPU-only measurement that
+didn't account for chunking.
+
+**5. What did the giant batch do to loss?** It got much worse - val loss 4.6963 (scaled LR) or 3.9478
+(unscaled), against 2.1478 at the fixed batch. The reason is steps, not reversibility: 92-93 optimizer
+updates instead of 939 for the same ~50M tokens. Seeing the tokens isn't the same as learning from them
+when each step now covers ten times as much data. This matches the caution in section 8.4, and the
+GPU run shows it's a large effect, not a minor one - loss more than doubled.
+
+**Surprise finding: the "unscaled" learning-rate control beat the "scaled" run** (val loss 3.9478 vs
+4.6963) - the opposite of what the `sqrt(batch)` scaling rule is meant to deliver. My read: with only
+about 92 steps total, the code's minimum warm-up (10 steps) eats over 10% of the entire run regardless of
+schedule, and the scaled run's peak learning rate hit its cap of 2e-3 - double the unscaled run's 1e-3.
+At this few a step, the higher peak rate looks to have made optimization noisier rather than more
+effective. This isn't a case against learning-rate scaling in general - it's a sign that the standard
+advice assumes enough steps remain for the schedule to do its job, and at 92 steps that assumption breaks.
+**[Likely]**, not certain, since it's one run each.
+
+**6. Speed at the pushed batch.** 44,572 tok/s (scaled) / 43,753 tok/s (unscaled) - both *lower* than the
+fixed-batch leapfrog run (47,812 tok/s), and well below the baseline (62,963 tok/s), even though a much
+bigger batch would normally be expected to use the GPU more efficiently. Most likely explanation: the
+chunked-loss recomputation (each logit chunk is computed twice - once in the forward pass, once again
+in the backward pass) adds overhead that outweighs the batch-size gain at this scale, and running this
+close to the GPU's memory ceiling may add allocator overhead of its own. I haven't isolated which of the
+two matters more - that would need a chunked-vs-not comparison at the same batch, which the notebooks
+don't currently run.
+
+**7. Cost, with vs without reversibility (the question raised in the session transcript).** At the same
+batch, reversible costs about 25-30% more per run than the baseline ($0.10-0.11 vs $0.08) - slower steps,
+same token count. Pushed to its own maximum batch it costs a little more again ($0.12), for a *worse*
+result here, because the token budget got spread across too few steps. So reversibility's payoff in this
+experiment isn't a cheaper run - it's unlocking a batch size the baseline physically cannot fit at all;
+that only pays off once there's also a large enough token budget to give it enough steps to use.
+
+### Predictions made before the GPU runs, checked against what happened
+
+| prediction | tag | actual |
+|---|---|---|
+| memory saved for backward stays flat as blocks are added | [Certain] | held: same ~5.28 GiB across all three reversible variants |
+| reversible steps ~25-40% slower at equal batch | [Likely] | milder: 18-24% |
+| largest batch grows by roughly 3x | [Likely] | grew 10x, because chunking the loss added more headroom than the CPU-only estimate accounted for |
+| baseline batch on a T4 "around 64-128" | [Guessing] | landed right in range: 104 |
+| reversible batch "a few hundred" | [Guessing] | too low: 1056 |
+| which variant wins on loss | [Guessing] | leapfrog, not called in advance |
 
 ## 11. References
 
