@@ -1,0 +1,9 @@
+# Colab already ships torch / numpy / matplotlib; the notebooks pip-install the other two.
+torch>=2.3
+numpy
+matplotlib
+tokenizers
+datasets
+# only needed to run the tests / rebuild the notebooks locally:
+pytest
+nbformat
