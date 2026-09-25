@@ -1,0 +1,26 @@
+{
+ "baseline": {
+  "ok": true,
+  "peak_mib": 13644.11474609375,
+  "tokens_per_sec": 76722.74500939152,
+  "B": 104
+ },
+ "midpoint": {
+  "ok": true,
+  "peak_mib": 5409.03662109375,
+  "tokens_per_sec": 58641.94397431847,
+  "B": 104
+ },
+ "leapfrog": {
+  "ok": true,
+  "peak_mib": 5408.97412109375,
+  "tokens_per_sec": 54744.832385923015,
+  "B": 104
+ },
+ "hamiltonian": {
+  "ok": true,
+  "peak_mib": 5406.56787109375,
+  "tokens_per_sec": 58423.61576161924,
+  "B": 104
+ }
+}

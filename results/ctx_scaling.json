@@ -1,0 +1,76 @@
+{
+ "rows": [
+  {
+   "name": "baseline",
+   "ctx": 256,
+   "B": 16,
+   "ok": true,
+   "peak_mib": 1308.95654296875,
+   "tokens_per_sec": 63096.528206693976,
+   "n_params": null
+  },
+  {
+   "name": "leapfrog",
+   "ctx": 256,
+   "B": 16,
+   "ok": true,
+   "peak_mib": 656.11962890625,
+   "tokens_per_sec": 47168.18853456238,
+   "n_params": null
+  },
+  {
+   "name": "baseline",
+   "ctx": 512,
+   "B": 16,
+   "ok": true,
+   "peak_mib": 2346.45849609375,
+   "tokens_per_sec": 62811.40289346767,
+   "n_params": null
+  },
+  {
+   "name": "leapfrog",
+   "ctx": 512,
+   "B": 16,
+   "ok": true,
+   "peak_mib": 1045.06787109375,
+   "tokens_per_sec": 46346.62843114397,
+   "n_params": null
+  },
+  {
+   "name": "baseline",
+   "ctx": 1024,
+   "B": 16,
+   "ok": true,
+   "peak_mib": 4382.07177734375,
+   "tokens_per_sec": 57037.87935559374,
+   "n_params": null
+  },
+  {
+   "name": "leapfrog",
+   "ctx": 1024,
+   "B": 16,
+   "ok": true,
+   "peak_mib": 1842.16552734375,
+   "tokens_per_sec": 42235.4627745626,
+   "n_params": null
+  },
+  {
+   "name": "baseline",
+   "ctx": 2048,
+   "B": 16,
+   "ok": true,
+   "peak_mib": 8480.78271484375,
+   "tokens_per_sec": 48316.19173970811,
+   "n_params": null
+  },
+  {
+   "name": "leapfrog",
+   "ctx": 2048,
+   "B": 16,
+   "ok": true,
+   "peak_mib": 3430.65771484375,
+   "tokens_per_sec": 36150.89543281337,
+   "n_params": null
+  }
+ ]
+}

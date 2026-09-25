@@ -1,0 +1,77 @@
+{
+ "name": "maxbatch_rev_plainloss",
+ "max_batch": 232,
+ "log": [
+  {
+   "B": 8,
+   "ok": true,
+   "peak_mib": 657.37158203125,
+   "tokens_per_sec": 35215.677194114745
+  },
+  {
+   "B": 16,
+   "ok": true,
+   "peak_mib": 1045.06787109375,
+   "tokens_per_sec": 39450.7479251662
+  },
+  {
+   "B": 32,
+   "ok": true,
+   "peak_mib": 1839.73974609375,
+   "tokens_per_sec": 55925.00625965088
+  },
+  {
+   "B": 64,
+   "ok": true,
+   "peak_mib": 3424.00537109375,
+   "tokens_per_sec": 56263.38432776672
+  },
+  {
+   "B": 128,
+   "ok": true,
+   "peak_mib": 6596.98974609375,
+   "tokens_per_sec": 55343.57160639631
+  },
+  {
+   "B": 256,
+   "ok": false,
+   "peak_mib": null,
+   "tokens_per_sec": null
+  },
+  {
+   "B": 192,
+   "ok": true,
+   "peak_mib": 9768.72412109375,
+   "tokens_per_sec": 53772.345853344115
+  },
+  {
+   "B": 224,
+   "ok": true,
+   "peak_mib": 11355.72412109375,
+   "tokens_per_sec": 53458.400210267595
+  },
+  {
+   "B": 240,
+   "ok": false,
+   "peak_mib": null,
+   "tokens_per_sec": null
+  },
+  {
+   "B": 232,
+   "ok": true,
+   "peak_mib": 11754.55224609375,
+   "tokens_per_sec": 52086.18389306914
+  }
+ ],
+ "model": {
+  "vocab_size": 8192,
+  "n_layer": 14,
+  "n_head": 5,
+  "d_model": 320,
+  "ctx": 512,
+  "mode": "leapfrog",
+  "h": 0.5,
+  "rev_impl": "memory_saving",
+  "loss_chunk": 0
+ }
+}

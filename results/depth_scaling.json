@@ -1,0 +1,76 @@
+{
+ "rows": [
+  {
+   "name": "baseline",
+   "n_layer": 7,
+   "B": 32,
+   "ok": true,
+   "peak_mib": 3000.07373046875,
+   "tokens_per_sec": 111442.90269753645,
+   "n_params": 11396480
+  },
+  {
+   "name": "leapfrog",
+   "n_layer": 7,
+   "B": 32,
+   "ok": true,
+   "peak_mib": 1738.72998046875,
+   "tokens_per_sec": 87186.52979611314,
+   "n_params": 11396480
+  },
+  {
+   "name": "baseline",
+   "n_layer": 14,
+   "B": 32,
+   "ok": true,
+   "peak_mib": 4380.34912109375,
+   "tokens_per_sec": 65023.01071042771,
+   "n_params": 20007040
+  },
+  {
+   "name": "leapfrog",
+   "n_layer": 14,
+   "B": 32,
+   "ok": true,
+   "peak_mib": 1838.17724609375,
+   "tokens_per_sec": 47958.387036809654,
+   "n_params": 20007040
+  },
+  {
+   "name": "baseline",
+   "n_layer": 28,
+   "B": 32,
+   "ok": true,
+   "peak_mib": 7141.08740234375,
+   "tokens_per_sec": 34790.872561929595,
+   "n_params": 37228160
+  },
+  {
+   "name": "leapfrog",
+   "n_layer": 28,
+   "B": 32,
+   "ok": true,
+   "peak_mib": 2037.69677734375,
+   "tokens_per_sec": 25339.381942580596,
+   "n_params": 37228160
+  },
+  {
+   "name": "baseline",
+   "n_layer": 56,
+   "B": 32,
+   "ok": true,
+   "peak_mib": 12662.90771484375,
+   "tokens_per_sec": 18140.170625237883,
+   "n_params": 71670400
+  },
+  {
+   "name": "leapfrog",
+   "n_layer": 56,
+   "B": 32,
+   "ok": true,
+   "peak_mib": 2434.62646484375,
+   "tokens_per_sec": 12824.449818588962,
+   "n_params": 71670400
+  }
+ ]
+}

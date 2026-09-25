@@ -1,0 +1,65 @@
+{
+ "name": "maxbatch_baseline",
+ "max_batch": 104,
+ "log": [
+  {
+   "B": 8,
+   "ok": true,
+   "peak_mib": 1309.30224609375,
+   "tokens_per_sec": 50504.85683238533
+  },
+  {
+   "B": 16,
+   "ok": true,
+   "peak_mib": 2346.45849609375,
+   "tokens_per_sec": 68464.13949583136
+  },
+  {
+   "B": 32,
+   "ok": true,
+   "peak_mib": 4379.64599609375,
+   "tokens_per_sec": 71910.76222021594
+  },
+  {
+   "B": 64,
+   "ok": true,
+   "peak_mib": 8473.81787109375,
+   "tokens_per_sec": 73160.36614951478
+  },
+  {
+   "B": 128,
+   "ok": false,
+   "peak_mib": null,
+   "tokens_per_sec": null
+  },
+  {
+   "B": 96,
+   "ok": true,
+   "peak_mib": 12566.50537109375,
+   "tokens_per_sec": 72182.095725475
+  },
+  {
+   "B": 112,
+   "ok": false,
+   "peak_mib": null,
+   "tokens_per_sec": null
+  },
+  {
+   "B": 104,
+   "ok": true,
+   "peak_mib": 13643.58349609375,
+   "tokens_per_sec": 71100.05138796582
+  }
+ ],
+ "model": {
+  "vocab_size": 8192,
+  "n_layer": 14,
+  "n_head": 5,
+  "d_model": 320,
+  "ctx": 512,
+  "mode": "baseline",
+  "h": 0.5,
+  "rev_impl": "memory_saving",
+  "loss_chunk": 0
+ }
+}
